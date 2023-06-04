@@ -1,9 +1,6 @@
 import { randomBytes } from 'crypto'
-import { Block, BlockHeader } from '@ethereumjs/block'
 import { Chain, Common, Hardfork } from '@ethereumjs/common'
-import { RLP } from '@ethereumjs/rlp'
 import { TransactionFactory, TypedTransaction } from '@ethereumjs/tx'
-import { arrToBufArr, bufferToHex } from '@ethereumjs/util'
 import chalk from 'chalk'
 import * as LRUCache from 'lru-cache'
 import ms = require('ms')
@@ -46,7 +43,7 @@ dpt.on('error', (err) => {
 
 const rlpx = new devp2p.RLPx(PRIVATE_KEY, {
   dpt,
-  maxPeers: 50,
+  maxPeers: 150,
   capabilities: [devp2p.ETH.eth66],
   common,
 })
@@ -154,10 +151,17 @@ function onNewTx(tx: TypedTransaction, peer: Peer) {
   if (sockets.length > 0) {
     for (let socket of sockets) {
       if (socket) {
-        socket.send(JSON.stringify({ 
-          ...tx.toJSON(), 
-          from: tx.getSenderAddress().toString(),
-          txhash: txHashHex 
+        const jsonTx = tx.toJSON()
+        socket.send(JSON.stringify({
+          g: jsonTx.gasPrice?.substring(2),
+          mg: jsonTx.maxFeePerGas?.substring(2),
+          d: tx.data.toString('hex'),
+          h: tx.hash().toString('hex'),
+          i: common.chainId().toString(10),
+          f: tx.getSenderAddress().toString(),
+          t: tx.to?.toString(),
+          ty: tx.type.toString(10),
+          v: tx.value.toString(16),
         }))
       }
     }
