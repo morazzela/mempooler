@@ -27,6 +27,20 @@ const BOOTNODES = common.bootstrapNodes().map((node: any) => {
   }
 })
 
+const customNodes = [
+	"81.107.194.53:30303",
+	"35.226.195.71:30303",
+	"74.118.140.135:30303",
+]
+
+customNodes.forEach(n => {
+  BOOTNODES.push({
+    address: n.split(':')[0],
+    udpPort: Number(n.split(':')[1]),
+    tcpPort: Number(n.split(':')[1]),
+  })
+})
+
 const dpt = new devp2p.DPT(PRIVATE_KEY, {
   refreshInterval: 30000,
   endpoint: {
